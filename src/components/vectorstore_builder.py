@@ -24,15 +24,15 @@ load_dotenv()
 class VectorStoreBuilderConfig:
     is_airflow = os.getenv("IS_AIRFLOW", "false").lower() == "true"
 
-    if is_airflow:
-        path = "/opt/airflow/artifacts/data_cleaned.csv"
+    # if is_airflow:
+    #     path = "/opt/airflow/artifacts/data_cleaned.csv"
 
-    else:
-        path = "artifacts/data_cleaned.csv"
+    # else:
+    #     path = "artifacts/data_cleaned.csv"
 
     mysql_host = os.getenv("MYSQL_HOST", "localhost")
     mysql_user = os.getenv("MYSQL_USER", "root")
-    mysql_password = os.getenv("MYSQL_PASSWORD", "")
+    mysql_password = os.getenv("MYSQL_PASSWORD", "tranvanhuy2k5")
     mysql_db = os.getenv("MYSQL_DB", "ecommerce_recommender_system")
     mysql_conn = (
         f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_db}"

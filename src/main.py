@@ -4,6 +4,7 @@ from src.components.data_collection import DataCollection
 from src.components.data_cleaning import DataCleaner
 from src.components.vectorstore_builder import VectorStoreBuilder
 from src.components.chatbot_builder import ChatbotBuilder
+from src.utils.chatbot_utils import BuildChatbot
 
 from src.utils.logger import logging
 from src.utils.exception import Custom_exception
@@ -22,8 +23,9 @@ def main():
         vectorstore_builder = VectorStoreBuilder()
         vector_store = vectorstore_builder.run_pipeline()
 
-        chatbot_builder = ChatbotBuilder()
-        chatbot = chatbot_builder.build_chatbot(vector_store)
+        # Use the Runnable-based chatbot wrapper which provides `invoke`
+        chatbot_builder = BuildChatbot()
+        chatbot = chatbot_builder.initialize_chatbot()
 
         # test code
         test_response = chatbot.invoke({"input": "What do you do?"})

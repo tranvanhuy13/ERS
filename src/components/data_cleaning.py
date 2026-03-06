@@ -19,18 +19,16 @@ class DataCleaningConfig:
     if is_airflow:
         input_path = None
         output_path = None
-    else:
-        input_path = "data"
-        output_path = "artifacts/data_cleaned.csv"
+    
 
     mysql_host = os.getenv("MYSQL_HOST", "localhost")
     mysql_user = os.getenv("MYSQL_USER", "root")
-    mysql_password = os.getenv("MYSQL_PASSWORD", "")
+    mysql_password = os.getenv("MYSQL_PASSWORD", "tranvanhuy2k5")
     mysql_db = os.getenv("MYSQL_DB", "ecommerce_recommender_system")
     mysql_conn = (
         f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_db}"
     )
-    tables = ["shirts", "women_clothes", "watches"]
+    tables = ["data_shirts", "data_woman_clothes", "data_watches"]
     cleaned_table = "data_cleaned"
 
 
