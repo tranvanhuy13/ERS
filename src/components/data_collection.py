@@ -17,9 +17,9 @@ products_config = [
         "table_name": "shirts",
     },
     {
-        "keyword": "Sarees",
+        "keyword": "Women Clothes",
         "num_products": 2000,
-        "table_name": "sarees",
+        "table_name": "women_clothes",
     },
     {
         "keyword": "Watches for men",

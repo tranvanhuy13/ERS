@@ -17,8 +17,8 @@ class DataCleaningConfig:
     is_airflow = os.getenv("IS_AIRFLOW", "false").lower() == "true"
 
     if is_airflow:
-        input_path = "/opt/airflow/data/"
-        output_path = "/opt/airflow/artifacts/data_cleaned.csv"
+        input_path = None
+        output_path = None
     else:
         input_path = "data"
         output_path = "artifacts/data_cleaned.csv"
@@ -30,7 +30,7 @@ class DataCleaningConfig:
     mysql_conn = (
         f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_db}"
     )
-    tables = ["shirts", "sarees", "watches"]
+    tables = ["shirts", "women_clothes", "watches"]
     cleaned_table = "data_cleaned"
 
 

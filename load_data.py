@@ -17,7 +17,7 @@ mysql_conn = f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql
 engine = create_engine(mysql_conn)
 
 # Read data from the three tables
-tables = ["data_shirts", "data_sarees", "data_watches"]
+tables = ["data_shirts", "data_women_clothes", "data_watches"]
 dfs = []
 for table in tables:
     try:
@@ -57,7 +57,7 @@ synthesized_info = {
     "total_products": len(df),
     "categories": {
         "shirts": len(dfs[0]) if len(dfs) > 0 else 0,
-        "sarees": len(dfs[1]) if len(dfs) > 1 else 0,
+        "women_clothes": len(dfs[1]) if len(dfs) > 1 else 0,
         "watches": len(dfs[2]) if len(dfs) > 2 else 0,
     },
     "columns": list(df.columns),

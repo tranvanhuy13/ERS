@@ -85,22 +85,7 @@ class VectorStoreBuilder:
             logging.error(f"Error in loading data: {str(e)}")
             raise Custom_exception(e, sys)
 
-    # facing issues with NVIDIA embeddings from nvidia backend, switched to HF BGE embeddings
-    # def create_embeddings(self) -> NVIDIAEmbeddings:
-    #     try:
-    #         logging.info("Initializing NVIDIA Embeddings.")
-    #         embeddings = NVIDIAEmbeddings(
-    #             model="NV-Embed-QA",   # nvidia/embed-qa-4    nvidia/nv-embedqa-mistral-7b-v2
-    #             api_key=self.nvidia_api_key,
-    #             truncate="NONE")
-
-    #         logging.info("Embeddings initialized successfully.")
-    #         return embeddings
-
-    #     except Exception as e:
-    #         logging.error(f"Error initializing embeddings: {str(e)}")
-    #         raise Custom_exception(e, sys)
-
+   
     def create_embeddings(self) -> HuggingFaceEndpointEmbeddings:
         try:
             logging.info("Initializing HF BGE Embeddings.")
