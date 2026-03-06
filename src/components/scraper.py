@@ -25,15 +25,19 @@ def scrape_products(keyword: str, num_products: int) -> pd.DataFrame:
         is_airflow = os.getenv("IS_AIRFLOW", "false").lower() == "true"
         logging.info(f"Running in {'Airflow' if is_airflow else 'local'} environment")
 
-        if is_airflow:
-            path = "/usr/bin/chromedriver"
-        else:
-            path = (
-                "F:/Data Science/Projects/4.Ecommerce-Chatbot-Project/chromedriver.exe"
-            )
+        # Allow overriding chromedriver path via env var, otherwise use sensible defaults
+        path = os.getenv("CHROMEDRIVER_PATH")
+        if not path:
+            if is_airflow:
+                path = "/usr/bin/chromedriver"
+            else:
+                path = "F:/Data Science/Projects/4.Ecommerce-Chatbot-Project/chromedriver.exe"
 
         # Initializing chrome_options
         chrome_options = Options()
+
+        # headless behaviour: default to headless to avoid opening a visible browser window
+        headless_env = os.getenv("HEADLESS", "true").lower() == "true"
 
         # configuration for airflow environment
         if is_airflow:
@@ -44,17 +48,30 @@ def scrape_products(keyword: str, num_products: int) -> pd.DataFrame:
             chrome_options.binary_location = (
                 "/usr/bin/chromium"  # chromium path in the container
             )
-            chrome_options.add_argument(
-                "--headless=new"
-            )  # scrape without a new Chrome window every time.
+            # prefer headless in airflow
+            chrome_options.add_argument("--headless=new")
+        else:
+            if headless_env:
+                chrome_options.add_argument("--headless=new")
 
         # configuration for both local and airflow environments
-        chrome_options.add_argument(
-            "--window-size=1920,1080"
-        )  # opening the new chrome window with maximum size
+        chrome_options.add_argument("--window-size=1920,1080")
 
         # initializing the driver
-        driver = webdriver.Chrome(service=Service(path), options=chrome_options)
+        try:
+            if path and os.path.exists(path):
+                driver = webdriver.Chrome(service=Service(path), options=chrome_options)
+            else:
+                logging.info(
+                    f"Chromedriver not found at '{path}'. Trying to start ChromeDriver from PATH or default locations."
+                )
+                # webdriver.Chrome() will attempt to find chromedriver on PATH
+                driver = webdriver.Chrome(options=chrome_options)
+
+        except Exception as e:
+            msg = f"Unable to obtain driver for chrome; ensure chromedriver is installed and CHROMEDRIVER_PATH is set correctly. Original error: {e}"
+            logging.error(msg)
+            raise Custom_exception(msg, sys)
 
         # timeouts after driver initialization
         driver.set_page_load_timeout(30)  # 30 seconds for page load
@@ -62,7 +79,8 @@ def scrape_products(keyword: str, num_products: int) -> pd.DataFrame:
 
         logging.info("Chrome driver initialized successfully")
 
-        url = "https://www.amazon.in/"
+        # Use amazon.com to get prices in dollars
+        url = "https://www.amazon.com/"
 
         try:
             logging.info(f"Attempting to navigate to: {url}")
@@ -73,9 +91,9 @@ def scrape_products(keyword: str, num_products: int) -> pd.DataFrame:
             logging.error(f"Error navigating to URL: {nav_error}")
             # Try alternative approach
             driver.execute_script(f"window.location.href = '{url}';")
-            time.sleep(5)
+            time.sleep(0.7)
 
-        time.sleep(2)
+        time.sleep(0.7)
 
         try:
             # captcha handling
@@ -115,7 +133,7 @@ def scrape_products(keyword: str, num_products: int) -> pd.DataFrame:
             By.XPATH, "//input[@id='nav-search-submit-button']"
         )
         search_button.click()
-        time.sleep(3)
+        time.sleep(0.7)
 
         data = []
         current_page = 1
@@ -181,6 +199,9 @@ def scrape_products(keyword: str, num_products: int) -> pd.DataFrame:
                         ".//span[@class='a-price']//span[@class='a-offscreen']",
                     )
                     selling_price = selling_price_element.get_attribute("textContent")
+                    # ensure price is in dollars
+                    if selling_price and "$" not in selling_price:
+                        selling_price = "na"
                 except:
                     selling_price = "na"
 
@@ -189,6 +210,8 @@ def scrape_products(keyword: str, num_products: int) -> pd.DataFrame:
                         By.XPATH,
                         ".//span[@class='a-price a-text-price']//span[@aria-hidden='true']",
                     ).text
+                    if mrp and "$" not in mrp:
+                        mrp = "na"
                 except:
                     mrp = "na"
 
@@ -226,7 +249,7 @@ def scrape_products(keyword: str, num_products: int) -> pd.DataFrame:
                     )
 
             # Click the "Next" button to go to the next page if the desired number of products isn't reached
-            time.sleep(3)
+            time.sleep(0.7)
             try:
                 next_button = driver.find_element(
                     By.XPATH,
@@ -235,7 +258,7 @@ def scrape_products(keyword: str, num_products: int) -> pd.DataFrame:
                 next_button.click()
                 current_page += 1
                 logging.info(f"Moving to next page: {current_page}")
-                time.sleep(3)
+                time.sleep(0.7)
 
             except NoSuchElementException:
                 logging.info("No next page found. Ending scrape.")

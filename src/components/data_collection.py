@@ -14,17 +14,17 @@ products_config = [
     {
         "keyword": "Mens formal shirts",
         "num_products": 2000,
-        "table_name": "shirts",
+        "table_name": "data_shirts",
     },
     {
         "keyword": "Women Clothes",
         "num_products": 2000,
-        "table_name": "women_clothes",
+        "table_name": "data_woman_clothes",
     },
     {
         "keyword": "Watches for men",
         "num_products": 2000,
-        "table_name": "watches",
+        "table_name": "data_watches",
     },
 ]
 
@@ -40,8 +40,8 @@ class DataCollectionConfig:
 
     mysql_host = os.getenv("MYSQL_HOST", "localhost")
     mysql_user = os.getenv("MYSQL_USER", "root")
-    mysql_password = os.getenv("MYSQL_PASSWORD", "")
-    mysql_db = os.getenv("MYSQL_DB", "ecommerce")
+    mysql_password = os.getenv("MYSQL_PASSWORD", "tranvanhuy2k5")
+    mysql_db = os.getenv("MYSQL_DB", "ecommerce_recommender_system")
     mysql_conn = (
         f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_db}"
     )
@@ -115,6 +115,7 @@ class DataCollection:
             raise Custom_exception(e, sys)
 
 
-# if __name__=="__main__":
-#     data_collection = DataCollection()
-#     data_collection.initiate_data_collection()
+if __name__ == "__main__":
+    data_collection = DataCollection()
+    result = data_collection.initiate_data_collection()
+    print(result)

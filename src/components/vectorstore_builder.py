@@ -85,7 +85,6 @@ class VectorStoreBuilder:
             logging.error(f"Error in loading data: {str(e)}")
             raise Custom_exception(e, sys)
 
-   
     def create_embeddings(self) -> HuggingFaceEndpointEmbeddings:
         try:
             logging.info("Initializing HF BGE Embeddings.")
@@ -123,12 +122,22 @@ class VectorStoreBuilder:
             logging.info(f"Connecting to Pinecone and creating index: {index_name}")
             pc = Pinecone(api_key=self.pinecone_api_key)
 
-            pc.create_index(
-                name=index_name,
-                dimension=384,  # 4096,   384
-                metric="cosine",
-                spec=ServerlessSpec(cloud="aws", region="us-east-1"),
-            )
+            # Create index if it doesn't exist. If it already exists (409), continue.
+            try:
+                pc.create_index(
+                    name=index_name,
+                    dimension=384,  # 4096,   384
+                    metric="cosine",
+                    spec=ServerlessSpec(cloud="aws", region="us-east-1"),
+                )
+            except Exception as e:
+                err_str = str(e)
+                if "ALREADY_EXISTS" in err_str or "409" in err_str:
+                    logging.info(
+                        f"Pinecone index '{index_name}' already exists. Using existing index."
+                    )
+                else:
+                    raise
 
             time.sleep(10)
             index = pc.Index(index_name)
