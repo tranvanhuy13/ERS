@@ -25,6 +25,8 @@ numpy==1.26.4
 Flask==2.2.4
 pymysql
 
+Flask-SQLAlchemy
+
 
 # for production (aws ec2)
 gunicorn     

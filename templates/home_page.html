@@ -8,48 +8,44 @@
       type="text/css"
       href="{{ url_for('static', filename='css/hp_style.css')}}"
     />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='css/auth.css') }}"
+    />
   </head>
 
   <body>
     <header class="header">
       <div class="topbar">
         <div class="logo"></div>
-        <h1></h1>
-        <nav class="navbar">
+        <nav class="nav-left">
           <ul>
             <li>
-              <a href="https://github.com/tranvanhuy13/ERS" target="_blank"
-                ><i class="fab fa-github"></i> Github</a
-              >
+              <a href="https://github.com/tranvanhuy13" target="_blank">
+                <i class="fab fa-github"></i> Github
+              </a>
             </li>
             <li><a href="">Get in touch</a></li>
-            <!--Dropdown menu-->
-            <li>
-              <a href=""
-                >Categories<i
-                  class="fa-solid fa-square-caret-down"
-                  style="color: rgb(131, 129, 129)"
-                ></i
-              ></a>
-              <ul class="dropdown-categories">
-                <li><a href="#men">Men's</a></li>
-                <li><a href="#women">Women's</a></li>
-                <li><a href="#accessories">Accessories</a></li>
-              </ul>
+            <li><a href="#men">Categories</a></li>
+            <li><a href="#about-section">About Us</a></li>
+            <li><a href="#footer">Contact Us</a></li>
+          </ul>
+        </nav>
+        <h1></h1>
+        <nav class="nav-right">
+          <ul>
+            {% if session.get('username') %}
+            <li class="hello">
+              <a href="#">Hello, {{ session.get('username') }}</a>
             </li>
-            <li>
-              <a href=""
-                >Menu
-                <i
-                  class="fa-solid fa-square-caret-down"
-                  style="color: rgb(131, 129, 129)"
-                ></i
-              ></a>
-              <ul class="dropdown-menu">
-                <li><a href="#about-section">About Us</a></li>
-                <li><a href="#footer">Contact Us</a></li>
-              </ul>
+            <li class="auth"><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+            <li class="hello"><a href="{{ url_for('login') }}">Login</a></li>
+            <li class="auth">
+              <a href="{{ url_for('register') }}">Register</a>
             </li>
+            {% endif %}
           </ul>
         </nav>
       </div>
