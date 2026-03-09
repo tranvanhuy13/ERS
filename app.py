@@ -13,6 +13,7 @@ from flask import (
     session,
     flash,
 )
+import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
@@ -176,6 +177,118 @@ def chat():
     logging.info(f"Chatbot Response: {response['answer']}")
 
     return jsonify({"response": response["answer"]})
+
+
+# --- Admin product management (CRUD) for `data_cleaned` table ---
+def _load_cleaned_df():
+    try:
+        df = pd.read_sql_table("data_cleaned", db.engine)
+        return df
+    except Exception:
+        # return empty DataFrame if table doesn't exist or on error
+        return pd.DataFrame()
+
+
+@app.route("/admin/products")
+def manage_products():
+    if session.get("role") != "admin":
+        flash("Admin access required.")
+        return redirect(url_for("login"))
+
+    df = _load_cleaned_df()
+    if df.empty:
+        columns = []
+        records = []
+    else:
+        columns = list(df.columns)
+        # add temporary id based on row index for operations
+        df = df.reset_index(drop=True)
+        df["_row_id"] = df.index
+        records = df.to_dict(orient="records")
+
+    return render_template("products.html", columns=columns, records=records)
+
+
+@app.route("/admin/products/create", methods=["GET", "POST"])
+def create_product():
+    if session.get("role") != "admin":
+        flash("Admin access required.")
+        return redirect(url_for("login"))
+
+    df = _load_cleaned_df()
+    columns = list(df.columns) if not df.empty else []
+
+    if request.method == "POST":
+        # build new row from form
+        new_row = {}
+        for key, val in request.form.items():
+            new_row[key] = val
+
+        if df.empty:
+            new_df = pd.DataFrame([new_row])
+            # create table
+            new_df.to_sql("data_cleaned", db.engine, if_exists="replace", index=False)
+        else:
+            # align columns: ensure all columns present
+            for col in columns:
+                if col not in new_row:
+                    new_row[col] = None
+            append_df = pd.DataFrame([new_row])
+            append_df.to_sql("data_cleaned", db.engine, if_exists="append", index=False)
+
+        flash("Product created.")
+        return redirect(url_for("manage_products"))
+
+    return render_template("product_form.html", columns=columns, record=None)
+
+
+@app.route("/admin/products/<int:row_id>/edit", methods=["GET", "POST"])
+def edit_product(row_id):
+    if session.get("role") != "admin":
+        flash("Admin access required.")
+        return redirect(url_for("login"))
+
+    df = _load_cleaned_df()
+    if df.empty or row_id < 0 or row_id >= len(df):
+        flash("Product not found.")
+        return redirect(url_for("manage_products"))
+
+    df = df.reset_index(drop=True)
+    columns = list(df.columns)
+    record = df.loc[row_id].to_dict()
+
+    if request.method == "POST":
+        for col in columns:
+            # update values from form if provided
+            if col in request.form:
+                df.at[row_id, col] = request.form.get(col)
+
+        # overwrite table with updated dataframe
+        df.to_sql("data_cleaned", db.engine, if_exists="replace", index=False)
+        flash("Product updated.")
+        return redirect(url_for("manage_products"))
+
+    return render_template(
+        "product_form.html", columns=columns, record=record, row_id=row_id
+    )
+
+
+@app.route("/admin/products/<int:row_id>/delete", methods=["POST"])
+def delete_product(row_id):
+    if session.get("role") != "admin":
+        return ("Unauthorized", 403)
+
+    df = _load_cleaned_df()
+    if df.empty or row_id < 0 or row_id >= len(df):
+        flash("Product not found.")
+        return redirect(url_for("manage_products"))
+
+    df = df.reset_index(drop=True)
+    df = df.drop(index=row_id).reset_index(drop=True)
+    # replace table
+    df.to_sql("data_cleaned", db.engine, if_exists="replace", index=False)
+    flash("Product deleted.")
+    return redirect(url_for("manage_products"))
 
 
 if __name__ == "__main__":

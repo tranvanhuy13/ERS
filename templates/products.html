@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Products Management</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='css/hp_style.css')}}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='css/auth.css') }}"
+    />
+  </head>
+
+  <body>
+    <header class="header">
+      <div class="topbar">
+        <div class="logo"></div>
+        <nav class="nav-left">
+          <ul>
+            <li>
+              <a href="https://github.com/tranvanhuy13" target="_blank">
+                <i class="fab fa-github"></i> Github
+              </a>
+            </li>
+            <li><a href="">Get in touch</a></li>
+            <li><a href="#men">Categories</a></li>
+            <li><a href="#about-section">About Us</a></li>
+            <li><a href="#footer">Contact Us</a></li>
+            {% if session.get('role') == 'admin' %}
+            <li>
+              <a href="{{ url_for('manage_products') }}">Products Management</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        <h1></h1>
+        <nav class="nav-right">
+          <ul>
+            {% if session.get('username') %}
+            <li class="hello">
+              <a href="#">Hello, {{ session.get('username') }}</a>
+            </li>
+            <li class="auth"><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+            <li class="hello"><a href="{{ url_for('login') }}">Login</a></li>
+            <li class="auth">
+              <a href="{{ url_for('register') }}">Register</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="content full-width" style="padding: 24px">
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 16px;
+        "
+      >
+        <h2>Products Management</h2>
+        <div>
+          <a class="auth" href="{{ url_for('create_product') }}"
+            >Create New Product</a
+          >
+        </div>
+      </div>
+
+      {% if not records %}
+      <div class="card">
+        <p>No products found.</p>
+      </div>
+      {% else %}
+      <div class="container-center">
+        <div class="product-list single-column">
+          {% for row in records %}
+          <div class="product-row">
+            <div class="product-info">
+              <div class="product-left">
+                <div class="product-title">
+                  {{ row.get('Product Name') or row.get('product_name') or row.get('Product') or 'Unnamed product' }}
+                </div>
+                <div class="product-brand">{{ row.get('Brand Name') or row.get('brand') or '' }}</div>
+
+                <div class="product-details-list" style="margin-top:8px;color:#444">
+                  {% for col in columns %}
+                    {% if row[col] %}
+                      <div style="font-size:0.95rem"><strong>{{ col }}:</strong>&nbsp;{{ row[col] }}</div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <div class="product-actions">
+              <a class="btn" href="{{ url_for('edit_product', row_id=row._row_id) }}">Edit</a>
+              <form action="{{ url_for('delete_product', row_id=row._row_id) }}" method="post" style="display: inline">
+                <button class="btn outline" type="submit" onclick="return confirm('Delete this product?')">Delete</button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </main>
+
+    <!-- Footer copied from home_page -->
+    <footer id="footer" class="footer">
+      <div class="footer-container">
+        <div class="footer-column">
+          <ul>
+            <li><a href="#">120 Hoang Minh Thao, Da Nang City, VietNam</a></li>
+            <li>
+              <a href="mailto:support@ecomchatbot.com">supporter@gmail.com</a>
+            </li>
+            <li><a href="tel:+84xxxxxxxxx">+84xxxxxxxxx</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4>Shopping & Categories</h4>
+          <ul>
+            <li><a href="#">Men's Fashion</a></li>
+            <li><a href="#">Women's Fashion</a></li>
+            <li><a href="#">Accessories</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4>Useful Links</h4>
+          <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Customer Support</a></li>
+            <li><a href="#">Contact Us</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4>Help & Information</h4>
+          <ul>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Return Policy</a></li>
+            <li><a href="#">Shipping Information</a></li>
+            <li><a href="#">Order Tracking</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>Copyright © 2024 E-commerce Chatbot. All Rights Reserved.</p>
+        <p>
+          Developed by
+          <a
+            href="https://github.com/tranvanhuy13"
+            target="_blank"
+            class="developer-link"
+            >tranvanhuy13</a
+          >
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
