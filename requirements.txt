@@ -1,0 +1,41 @@
+# core dependencies 
+# groq==0.16.0
+# pydantic==2.10.6
+# pydantic_core==2.27.2
+# pydantic-settings==2.7.1
+langchain==0.3.15
+langchain-core
+# langchain-community==0.3.15
+# # huggingface-hub==0.28.0
+langchain-nvidia-ai-endpoints==0.3.8
+# Pinecone==5.4.2
+langchain-pinecone==0.2.2
+langchain-groq==0.2.4
+# langgraph==0.2.70 
+langchain_huggingface==0.3.1
+langchain-google-genai==2.1.12
+
+
+# other  dependencies
+# selenium==4.28.1  
+# amazoncaptcha==0.5.11
+python-dotenv
+pandas==2.2.3
+numpy==1.26.4
+Flask==2.2.4
+pymysql
+
+Flask-SQLAlchemy
+
+
+# for production (aws ec2)
+gunicorn     
+
+
+# for airflow, since we are using slim airflow image and it does not include the below module in it 
+# psycopg2-binary
+# asyncpg
+# apache-airflow-providers-celery>=3.3.0
+
+
+# -e . 
